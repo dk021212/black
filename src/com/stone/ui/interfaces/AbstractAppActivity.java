@@ -1,5 +1,6 @@
 package com.stone.ui.interfaces;
 
+import com.stone.support.asyncdrawable.TimeLineBitmapDownloader;
 import com.stone.support.settinghelper.SettingUtility;
 import com.stone.support.utils.GlobalContext;
 
@@ -28,6 +29,12 @@ public class AbstractAppActivity extends FragmentActivity {
 		
 		overridePendingTransition(0,0);
 		startActivity(intent);
+		TimeLineBitmapDownloader.refreshThemePictureBackground();
 	}
-
+	
+	public TimeLineBitmapDownloader getBitmapDownloader(){
+		return TimeLineBitmapDownloader.getInstance();
+	}
+	
+	
 }

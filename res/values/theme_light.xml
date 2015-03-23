@@ -8,6 +8,8 @@
         <item name="android:actionBarTabStyle">@style/ActionBarTabViewLight</item>
         <item name="android:actionBarWidgetTheme">@style/ActionBarTheme</item>
         <item name="android:actionBarItemBackground">@drawable/action_bar_item_background</item>-->
+        
+        <item name="listview_pic_bg">@color/listview_pic_background_light</item>
     </style>
 
     <style name="ActionBarStyle" parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
