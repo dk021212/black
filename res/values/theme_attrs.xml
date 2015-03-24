@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <!-- actionbar action mode menu -->
+    <attr name="add" format="reference"></attr>
+    
+    <attr name="listview_pic_bg" format="integer"></attr>
+    
+</resources>

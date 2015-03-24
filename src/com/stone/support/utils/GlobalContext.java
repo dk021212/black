@@ -8,11 +8,18 @@ public class GlobalContext extends Application {
 
 	// singleton
 	private static GlobalContext globalContext = null;
-	
-	//image size
-	private Activity activity=null;
-	
+
+	// image size
+	private Activity activity = null;
+
 	private Activity currentRunningActivity = null;
+
+	@Override
+	public void onCreate() {
+		super.onCreate();
+		globalContext = this;
+		
+	}
 
 	public static GlobalContext getInstance() {
 		return globalContext;
@@ -27,12 +34,12 @@ public class GlobalContext extends Application {
 	}
 
 	public Activity getActivity() {
-		
+
 		return activity;
 	}
-	
-	public void setActivity(Activity activity){
-		this.activity=activity;
+
+	public void setActivity(Activity activity) {
+		this.activity = activity;
 	}
 
 }

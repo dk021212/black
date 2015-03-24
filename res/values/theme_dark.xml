@@ -1,15 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
 
     <style name="AppTheme_Dark" parent="@style/PrivateThemeHoloOnlyForInherit">
         <item name="listview_pic_bg">@color/listview_pic_background_dark</item>
     </style>
-    
+
     <style name="PrivateThemeHoloOnlyForInherit" parent="@android:style/Theme.Holo">
         <item name="android:windowBackground">@color/dark_theme_background</item>
         <item name="android:actionBarStyle">@style/ActionBarStyle_Black</item>
         <item name="android:actionDropDownStyle">@style/ActionBarDropDownStyle_black</item>
         <item name="android:actionBarTabStyle">@style/ActionBarTabViewDark</item>
+    </style>
+
+    <style name="ActionBarStyle_Black" parent="@android:style/Widget.Holo.ActionBar">
+        <item name="android:background">@drawable/abs__ab_solid_dark_holo</item>
+        <item name="android:backgroundSplit">@drawable/abs__ab_bottom_solid_dark_holo</item>
+        <item name="android:backgroundStacked">#262626</item>
+    </style>
+
+    <style name="ActionBarDropDownStyle_black" parent="@android:style/Widget.Holo.Spinner">
+        <item name="android:background">@drawable/actionbar_dropdown_navigation_item_background_dark</item>
+        <item name="android:gravity">center_vertical|left</item>
+        <item name="android:spinnerMode">dropdown</item>
+        <item name="android:dropDownWidth">200dp</item>
+        <item name="android:dropDownVerticalOffset">0dip</item>
+        <item name="android:dropDownHorizontalOffset">0dip</item>
+    </style>
+    
+    <style name="ActionBarTabViewDark" parent="@android:style/Widget.Holo.ActionBar.TabView">
+        <item name="android:background">@drawable/actionbar_tab_background_dark</item>
     </style>
 
 </resources>
