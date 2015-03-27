@@ -1,7 +1,7 @@
 package com.stone.ui.interfaces;
 
-import java.lang.reflect.Field;
 
+import java.lang.reflect.Field;
 import com.stone.support.asyncdrawable.TimeLineBitmapDownloader;
 import com.stone.support.settinghelper.SettingUtility;
 import com.stone.support.utils.GlobalContext;

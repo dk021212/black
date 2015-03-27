@@ -4,9 +4,14 @@
     <string name="app_name">black</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    
+    <!-- menu -->
+    <string name="ok">确定</string>
 
     <!-- system -->
     <string name="unknown_error_error_code">未知代码，错误代码</string>
+    <string name="something_error">发生故障</string>
+    <string name="please_delete_cache_dir">权限出错，无法读取存储空间，需要用户手动删除SD卡下的/Android/data/com.stone.black 目录</string>
     
     <!-- accountactivity_layout -->
     <string name="add_account">添加</string>

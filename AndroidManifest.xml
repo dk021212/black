@@ -13,7 +13,8 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme_Light"
-        android:largeHeap="true" >
+        android:largeHeap="true"
+        android:name="com.stone.support.utils.GlobalContext" >
         <activity
             android:name="com.stone.ui.login.AccountActivity"
             android:label="@string/app_name"
@@ -24,6 +25,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        
+         <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="c92ba87cacf1f1e4ccc89293619505f77dca6e53" />
+         
     </application>
 
+    <uses-permission android:name="android.permission.INTERNET" />
 </manifest>
