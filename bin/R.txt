@@ -357,10 +357,13 @@ int string add_account 0x7f050008
 int string app_name 0x7f050001
 int string com_crashlytics_android_build_id 0x7f050000
 int string hello_world 0x7f050002
+int string login 0x7f05000a
+int string oauth_login 0x7f05000b
 int string ok 0x7f050004
 int string please_delete_cache_dir 0x7f050007
 int string something_error 0x7f050006
 int string unknown_error_error_code 0x7f050005
+int string you_cancel_login 0x7f050009
 int style ActionBar_Subtitle_Text 0x7f07000f
 int style ActionBar_Title_Text 0x7f07000e
 int style ActionBarDropDownStyle 0x7f07000a

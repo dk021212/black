@@ -15,5 +15,8 @@
     
     <!-- accountactivity_layout -->
     <string name="add_account">添加</string>
+    <string name="you_cancel_login">你取消了授权</string>
+    <string name="login">登录</string>
+    <string name="oauth_login">网页授权</string>
 
 </resources>

@@ -11,6 +11,8 @@
             </intent-filter>
         </activity>
         
+        <activity android:name="com.stone.ui.login.OAuthActivity"/>
+        
          <meta-data android:name="io.fabric.ApiKey" android:value="c92ba87cacf1f1e4ccc89293619505f77dca6e53"/>
          
     </application>
