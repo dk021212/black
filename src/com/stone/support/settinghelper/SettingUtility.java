@@ -24,4 +24,8 @@ public class SettingUtility {
 			return R.style.AppTheme_Light;
 		}
 	}
+
+	public static String getDefaultAccountId() {
+		return SettingHelper.getSharedPreferences(getContext(), "id", "");
+	}
 }

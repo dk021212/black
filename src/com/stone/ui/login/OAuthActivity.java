@@ -1,27 +1,41 @@
 package com.stone.ui.login;
 
-import java.text.MessageFormat;
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 
 import android.app.ActionBar;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.stone.bean.AccountBean;
+import com.stone.bean.UserBean;
 import com.stone.black.R;
 import com.stone.dao.URLHelper;
+import com.stone.dao.login.OAuthDao;
+import com.stone.support.database.AccountDBTask;
 import com.stone.support.debug.AppLogger;
+import com.stone.support.error.WeiboException;
+import com.stone.support.lib.MyAsyncTask;
 import com.stone.support.utils.Utility;
 import com.stone.ui.interfaces.AbstractAppActivity;
 
@@ -32,7 +46,7 @@ public class OAuthActivity extends AbstractAppActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
 		setContentView(R.layout.oauthactivity_layout);
 		ActionBar actionBar = getActionBar();
 		actionBar.setDisplayHomeAsUpEnabled(false);
@@ -53,10 +67,34 @@ public class OAuthActivity extends AbstractAppActivity {
 	}
 
 	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		webView.clearCache(true);
+	}
+
+	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		// TBD
+		getMenuInflater().inflate(R.menu.actionbar_menu_oauthactivity, menu);
+		refreshItem = menu.findItem(R.id.menu_refresh);
 		refresh();
 		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case android.R.id.home:
+			Intent intent = AccountActivity.newItent();
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+					| Intent.FLAG_ACTIVITY_NEW_TASK);
+			startActivity(intent);
+			return true;
+		case R.id.menu_refresh:
+			refresh();
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
 	}
 
 	private class WeiboWebViewClient extends WebViewClient {
@@ -70,12 +108,29 @@ public class OAuthActivity extends AbstractAppActivity {
 		@Override
 		public void onPageStarted(WebView view, String url, Bitmap favicon) {
 			if (url.startsWith(URLHelper.DIRECT_URL)) {
+				AppLogger.d("true");
 				handleRedirectUrl(view, url);
 				view.stopLoading();
 				return;
 			}
-
+			AppLogger.d("false");
 			super.onPageStarted(view, url, favicon);
+		}
+
+		@Override
+		public void onReceivedError(WebView view, int errorCode,
+				String description, String failingUrl) {
+			super.onReceivedError(view, errorCode, description, failingUrl);
+			new SinaWeiboErrorDialog().show(getSupportFragmentManager(), "");
+
+		}
+
+		@Override
+		public void onPageFinished(WebView view, String url) {
+			super.onPageFinished(view, url);
+			if (!url.equals("about:blank")) {
+				completeRefresh();
+			}
 		}
 	}
 
@@ -104,8 +159,34 @@ public class OAuthActivity extends AbstractAppActivity {
 		webView.clearView();
 		webView.loadUrl("abount:blank");
 		LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		// TBD
+		ImageView iv = (ImageView) inflater.inflate(
+				R.layout.refresh_action_view, null);
+
+		Animation rotation = AnimationUtils.loadAnimation(this, R.anim.refresh);
+		iv.startAnimation(rotation);
+
+		refreshItem.setActionView(iv);
 		webView.loadUrl(getWeiboAuthUrl());
+	}
+
+	private void completeRefresh() {
+		if (refreshItem.getActionView() != null) {
+			refreshItem.getActionView().clearAnimation();
+			refreshItem.setActionView(null);
+		}
+	}
+
+	@Override
+	public void onBackPressed() {
+		super.onBackPressed();
+		if (webView.canGoBack()) {
+			webView.goBack();
+		} else {
+			Toast.makeText(OAuthActivity.this,
+					getString(R.string.you_cancel_login), Toast.LENGTH_LONG)
+					.show();
+			finish();
+		}
 	}
 
 	private String getWeiboAuthUrl() {
@@ -114,10 +195,168 @@ public class OAuthActivity extends AbstractAppActivity {
 		parameters.put("response_type", "token");
 		parameters.put("redirect_uri", URLHelper.DIRECT_URL);
 		parameters.put("display", "mobile");
-		String url=URLHelper.URL_OAUTH2_ACCESS_AUTHORIZE + "?"
+		String url = URLHelper.URL_OAUTH2_ACCESS_AUTHORIZE + "?"
 				+ Utility.encodeUrl(parameters)
 				+ "&scope=friendships_groups_read,friendships_groups_write";
-		AppLogger.d("request url="+url);
+		AppLogger.d("request url=" + url);
 		return url;
+	}
+
+	public static class SinaWeiboErrorDialog extends DialogFragment {
+
+		@Override
+		public Dialog onCreateDialog(Bundle savedInstanceState) {
+			AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+			builder.setMessage(R.string.sina_server_error).setPositiveButton(
+					R.string.ok, new DialogInterface.OnClickListener() {
+
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							// TODO Auto-generated method stub
+						}
+					});
+
+			return builder.create();
+		}
+	}
+
+	private static class OAuthTask extends
+			MyAsyncTask<String, UserBean, DBResult> {
+
+		private WeiboException e;
+
+		private ProgressFragment progressFragment = ProgressFragment
+				.newInstance();
+		private WeakReference<OAuthActivity> oAuthActivityWeakReference;
+
+		private OAuthTask(OAuthActivity activity) {
+			oAuthActivityWeakReference = new WeakReference<OAuthActivity>(
+					activity);
+		}
+
+		@Override
+		protected void onPreExecute() {
+			progressFragment.setAsyncTask(this);
+
+			OAuthActivity activity = oAuthActivityWeakReference.get();
+			if (activity != null) {
+				progressFragment.show(activity.getSupportFragmentManager(), "");
+			}
+		}
+
+		@Override
+		protected DBResult doInBackground(String... params) {
+			String token = params[0];
+			long expiresInSeconds = Long.valueOf(params[1]);
+
+			try {
+				UserBean user = new OAuthDao(token).getOAuthUserInfo();
+				AccountBean account = new AccountBean();
+				account.setAccess_token(token);
+				account.setExpires_time(System.currentTimeMillis()
+						+ expiresInSeconds * 1000);
+				account.setInfo(user);
+				AppLogger.e("token expires in "
+						+ Utility.calcTokenExpiresInDays(account));
+				return AccountDBTask.addOrUpdateAccount(account, false);
+			} catch (WeiboException e) {
+				AppLogger.e(e.getError());
+				this.e = e;
+				cancel(true);
+				return null;
+			}
+		}
+
+		@Override
+		protected void onCancelled(DBResult dbResult) {
+			super.onCancelled(dbResult);
+			if (progressFragment != null) {
+				progressFragment.dismissAllowingStateLoss();
+			}
+
+			OAuthActivity activity = oAuthActivityWeakReference.get();
+			if (activity == null) {
+				return;
+			}
+
+			if (e != null) {
+				Toast.makeText(activity, e.getError(), Toast.LENGTH_LONG)
+						.show();
+			}
+
+			activity.webView.loadUrl(activity.getWeiboAuthUrl());
+		}
+
+		@Override
+		protected void onPostExecute(DBResult dbResult) {
+			if (progressFragment.isVisible()) {
+				progressFragment.dismissAllowingStateLoss();
+			}
+
+			OAuthActivity activity = oAuthActivityWeakReference.get();
+			if (activity == null) {
+				return;
+			}
+
+			switch (dbResult) {
+			case add_successfully:
+				Toast.makeText(activity,
+						activity.getString(R.string.login_success),
+						Toast.LENGTH_LONG).show();
+				break;
+			case update_successfully:
+				Toast.makeText(activity, R.string.update_account_success,
+						Toast.LENGTH_LONG).show();
+				break;
+			}
+			activity.finish();
+		}
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		if (isFinishing()) {
+			webView.stopLoading();
+		}
+	}
+
+	public static class ProgressFragment extends DialogFragment {
+		MyAsyncTask asyncTask = null;
+
+		public static ProgressFragment newInstance() {
+			ProgressFragment frag = new ProgressFragment();
+			frag.setRetainInstance(true);
+			Bundle args = new Bundle();
+			frag.setArguments(args);
+			return frag;
+		}
+
+		@Override
+		public Dialog onCreateDialog(Bundle savedInstanceState) {
+			ProgressDialog dialog = new ProgressDialog(getActivity());
+			dialog.setMessage(getString(R.string.oauthing));
+			dialog.setIndeterminate(false);
+			dialog.setCancelable(true);
+
+			return dialog;
+		}
+
+		@Override
+		public void onCancel(DialogInterface dialog) {
+			if (asyncTask != null) {
+				asyncTask.cancel(true);
+			}
+
+			super.onCancel(dialog);
+		}
+
+		void setAsyncTask(MyAsyncTask task) {
+			asyncTask = task;
+		}
+	};
+
+	public static enum DBResult {
+		add_successfully, update_successfully
 	}
 }

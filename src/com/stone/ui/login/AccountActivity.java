@@ -11,6 +11,7 @@ import android.view.MenuItem;
 
 import com.crashlytics.android.Crashlytics;
 import com.stone.black.R;
+import com.stone.support.utils.GlobalContext;
 import com.stone.ui.interfaces.AbstractAppActivity;
 
 import io.fabric.sdk.android.Fabric;
@@ -18,6 +19,15 @@ import io.fabric.sdk.android.Fabric;
 public class AccountActivity extends AbstractAppActivity {
 
 	private final int ADD_ACCOUNT_REQUEST_CODE = 0;
+	private static final String ACTION_OPEN_FROM_APP_INNER = "com.stone:accountactivity";
+	private final int LOADER_ID = 0;
+
+	public static Intent newItent() {
+		Intent intent = new Intent(GlobalContext.getInstance(),
+				AccountActivity.class);
+		intent.setAction(ACTION_OPEN_FROM_APP_INNER);
+		return intent;
+	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -59,6 +69,17 @@ public class AccountActivity extends AbstractAppActivity {
 			break;
 		}
 		return true;
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode == ADD_ACCOUNT_REQUEST_CODE && resultCode == RESULT_OK) {
+			refresh();
+		}
+	}
+
+	private void refresh() {
+		getLoaderManager().getLoader(LOADER_ID).forceLoad();
 	}
 
 }
