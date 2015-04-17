@@ -1,17 +1,33 @@
 package com.stone.support.file;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.stone.black.R;
+import com.stone.support.debug.AppLogger;
 import com.stone.support.utils.GlobalContext;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Environment;
+import android.text.TextUtils;
 import android.widget.Toast;
 
 public class FileManager {
+
+	private static final String AVATAR_SMALL = "avater_small";
+	private static final String AVATAR_LARGE = "avater_large";
+	private static final String PICTURE_THUMBNAIL = "picture_thumbnail";
+	private static final String PICTURE_BMIDDLE = "picture_bmiddle";
+	private static final String PICTURE_LARGE = "picture_large";
+	private static final String MAP = "map";
+	private static final String COVER = "cover";
+	private static final String EMOTION = "emotion";
+	private static final String TXT2PIC = "txt2pic";
+	private static final String WEBVIEW_FAVICON = "favicon";
 
 	private static final String LOG = "log";
 
@@ -107,5 +123,103 @@ public class FileManager {
 
 			return path;
 		}
+	}
+
+	public static String getFilePathFromUrl(String url,
+			FileLocationMethod method) {
+		if (!isExternalStorageMounted()) {
+			return "";
+		}
+
+		if (TextUtils.isEmpty(url)) {
+			return "";
+		}
+
+		int index = url.indexOf("//");
+
+		String s = url.substring(index + 2);
+		String oldRelativePath = s.substring(s.indexOf("/"));
+
+		String newRelativePath = "";
+
+		switch (method) {
+		case avatar_small:
+			newRelativePath = AVATAR_SMALL + oldRelativePath;
+			break;
+		case avatar_large:
+			newRelativePath = AVATAR_LARGE + oldRelativePath;
+			break;
+		case picture_thumbnail:
+			newRelativePath = PICTURE_THUMBNAIL + oldRelativePath;
+			break;
+		case picture_bmiddle:
+			newRelativePath = PICTURE_BMIDDLE + oldRelativePath;
+			break;
+		case picture_large:
+			newRelativePath = PICTURE_LARGE + oldRelativePath;
+			break;
+		case emotion:
+			String name = new File(oldRelativePath).getName();
+			newRelativePath = EMOTION + File.separator + name;
+			break;
+		case cover:
+			newRelativePath = COVER + oldRelativePath;
+			break;
+		case map:
+			newRelativePath = MAP + oldRelativePath;
+			break;
+		}
+
+		String result = getSdCardPath() + File.separator + newRelativePath;
+		if (!result.endsWith(".jpg") && !result.endsWith(".gif")
+				&& !result.endsWith(".png")) {
+			result = result + ".jpg";
+		}
+
+		return result;
+	}
+
+	public static File createNewFileInSDCard(String absolutePath) {
+		if (!isExternalStorageMounted()) {
+			AppLogger.d("sdcard unavaiable");
+			return null;
+		}
+
+		File file = new File(absolutePath);
+		if (file.exists()) {
+			return file;
+		} else {
+			File dir = file.getParentFile();
+			if (!dir.exists()) {
+				dir.mkdirs();
+			}
+
+			try {
+				if (file.createNewFile()) {
+					return file;
+				}
+			} catch (IOException e) {
+				AppLogger.d(e.getMessage());
+				return null;
+			}
+		}
+
+		return null;
+	}
+	
+	public static List<String> getCachePath(){
+		List<String> path = new ArrayList<String>();
+        if (isExternalStorageMounted()) {
+            String thumbnailPath = getSdCardPath() + File.separator + PICTURE_THUMBNAIL;
+            String middlePath = getSdCardPath() + File.separator + PICTURE_BMIDDLE;
+            String oriPath = getSdCardPath() + File.separator + PICTURE_LARGE;
+            String largeAvatarPath = getSdCardPath() + File.separator + AVATAR_LARGE;
+
+            path.add(thumbnailPath);
+            path.add(middlePath);
+            path.add(oriPath);
+            path.add(largeAvatarPath);
+        }
+        return path;
 	}
 }

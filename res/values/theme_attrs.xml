@@ -4,6 +4,11 @@
     <!-- actionbar action mode menu -->
     <attr name="add" format="reference"></attr>
     <attr name="refresh" format="reference"></attr>
+    <attr name="remove" format="reference"/>
     <attr name="listview_pic_bg" format="integer"></attr>
+    <attr name="listview_checked_color" format="reference"/>
+    <attr name="write_weibo" format="reference"/>
     
+    <!--textview link-->
+    <attr name="link_color" format="reference"/>
 </resources>

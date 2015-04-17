@@ -37,6 +37,18 @@ public abstract class MyAsyncTask<Params, Progress, Result> {
 
 	};
 
+	private static final ThreadFactory sDownloadThreadFactory = new ThreadFactory() {
+
+		private final AtomicInteger mCount = new AtomicInteger(1);
+
+		@Override
+		public Thread newThread(Runnable r) {
+			return new Thread(r, "AsyncTask Download #"
+					+ mCount.getAndIncrement());
+		}
+
+	};
+
 	/**
 	 * An {@link Executor} that executes tasks one at a time in serial order.
 	 * This serialization is global to a particular process.
@@ -57,6 +69,8 @@ public abstract class MyAsyncTask<Params, Progress, Result> {
 
 	private static final BlockingQueue<Runnable> sPoolWorkQueue = new LinkedBlockingQueue<Runnable>(
 			10);
+	private static final BlockingQueue<Runnable> sDownloadPoolWorkQueue = new LinkedBlockingQueue<Runnable>(
+			5);
 
 	public MyAsyncTask() {
 		mWorker = new WorkerRunnable<Params, Result>() {
@@ -101,6 +115,10 @@ public abstract class MyAsyncTask<Params, Progress, Result> {
 	public static final Executor THREAD_POOL_EXECUTOR = new ThreadPoolExecutor(
 			CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, KEEP_ALIVE, TimeUnit.SECONDS,
 			sPoolWorkQueue, sThreadFactory,
+			new ThreadPoolExecutor.DiscardOldestPolicy());
+	public static final Executor DOWNLOAD_THREAD_POOL_EXECUTOR = new ThreadPoolExecutor(
+			4, 20, KEEP_ALIVE, TimeUnit.SECONDS, sDownloadPoolWorkQueue,
+			sDownloadThreadFactory,
 			new ThreadPoolExecutor.DiscardOldestPolicy());
 
 	private static class SerialExecutor implements Executor {
@@ -197,6 +215,19 @@ public abstract class MyAsyncTask<Params, Progress, Result> {
 	}
 
 	/**
+	 * Returns <tt>true</tt> if this task was cancelled before it completed
+	 * normally. If you are calling {@link #cancel(boolean)} on the task, the
+	 * value returned by this method should be checked periodically from
+	 * {@link #doInBackground(Object[])} to end the task as soon as possible.
+	 *
+	 * @return <tt>true</tt> if task was cancelled before it completed
+	 * @see #cancel(boolean)
+	 */
+	public final boolean isCancelled() {
+		return mFuture.isCancelled();
+	}
+
+	/**
 	 * Executes the task with the specified parameters. The task returns itself
 	 * (this) so that the caller can keep a reference to it.
 	 * <p/>
@@ -229,34 +260,42 @@ public abstract class MyAsyncTask<Params, Progress, Result> {
 	}
 
 	/**
-     * Executes the task with the specified parameters. The task returns
-     * itself (this) so that the caller can keep a reference to it.
-     * <p/>
-     * <p>This method is typically used with {@link #THREAD_POOL_EXECUTOR} to
-     * allow multiple tasks to run in parallel on a pool of threads managed by
-     * AsyncTask, however you can also use your own {@link Executor} for custom
-     * behavior.
-     * <p/>
-     * <p><em>Warning:</em> Allowing multiple tasks to run in parallel from
-     * a thread pool is generally <em>not</em> what one wants, because the order
-     * of their operation is not defined.  For example, if these tasks are used
-     * to modify any state in common (such as writing a file due to a button click),
-     * there are no guarantees on the order of the modifications.
-     * Without careful work it is possible in rare cases for the newer version
-     * of the data to be over-written by an older one, leading to obscure data
-     * loss and stability issues.  Such changes are best
-     * executed in serial; to guarantee such work is serialized regardless of
-     * platform version you can use this function with {@link #SERIAL_EXECUTOR}.
-     * <p/>
-     * <p>This method must be invoked on the UI thread.
-     *
-     * @param exec   The executor to use.  {@link #THREAD_POOL_EXECUTOR} is available as a
-     *               convenient process-wide thread pool for tasks that are loosely coupled.
-     * @param params The parameters of the task.
-     * @return This instance of AsyncTask.
-     * @throws IllegalStateException If {@link #getStatus()} returns either
-     *                               {@link AsyncTask.Status#RUNNING} or {@link AsyncTask.Status#FINISHED}.
-     */
+	 * Executes the task with the specified parameters. The task returns itself
+	 * (this) so that the caller can keep a reference to it.
+	 * <p/>
+	 * <p>
+	 * This method is typically used with {@link #THREAD_POOL_EXECUTOR} to allow
+	 * multiple tasks to run in parallel on a pool of threads managed by
+	 * AsyncTask, however you can also use your own {@link Executor} for custom
+	 * behavior.
+	 * <p/>
+	 * <p>
+	 * <em>Warning:</em> Allowing multiple tasks to run in parallel from a
+	 * thread pool is generally <em>not</em> what one wants, because the order
+	 * of their operation is not defined. For example, if these tasks are used
+	 * to modify any state in common (such as writing a file due to a button
+	 * click), there are no guarantees on the order of the modifications.
+	 * Without careful work it is possible in rare cases for the newer version
+	 * of the data to be over-written by an older one, leading to obscure data
+	 * loss and stability issues. Such changes are best executed in serial; to
+	 * guarantee such work is serialized regardless of platform version you can
+	 * use this function with {@link #SERIAL_EXECUTOR}.
+	 * <p/>
+	 * <p>
+	 * This method must be invoked on the UI thread.
+	 *
+	 * @param exec
+	 *            The executor to use. {@link #THREAD_POOL_EXECUTOR} is
+	 *            available as a convenient process-wide thread pool for tasks
+	 *            that are loosely coupled.
+	 * @param params
+	 *            The parameters of the task.
+	 * @return This instance of AsyncTask.
+	 * @throws IllegalStateException
+	 *             If {@link #getStatus()} returns either
+	 *             {@link AsyncTask.Status#RUNNING} or
+	 *             {@link AsyncTask.Status#FINISHED}.
+	 */
 	public final MyAsyncTask<Params, Progress, Result> executeOnExecutor(
 			Executor exec, Params... params) {
 		if (mStatus != Status.PENDING) {
@@ -269,24 +308,32 @@ public abstract class MyAsyncTask<Params, Progress, Result> {
 						"Can not execute task: the task has already executed (a task can be execute only once)");
 			}
 		}
-		
-		mStatus=Status.RUNNING;
-		
+
+		mStatus = Status.RUNNING;
+
 		onPreExecute();
-		
-		mWorker.mParams=params;
+
+		mWorker.mParams = params;
 		exec.execute(mFuture);
-		
+
 		return this;
 	}
-	
+
 	/**
-     * Convenience version of {@link #execute(Object...)} for use with
-     * a simple Runnable object.
-     */
-	public static void execute(Runnable runnable){
+	 * Convenience version of {@link #execute(Object...)} for use with a simple
+	 * Runnable object.
+	 */
+	public static void execute(Runnable runnable) {
 		sDefaultExecutor.execute(runnable);
 	}
+
+	protected final void publishProgress(Progress... value) {
+		if (!isCanceled()) {
+			sHandler.obtainMessage(MESSAGE_POST_PROGRESS,
+					new AsyncTaskResult<Progress>(this, value)).sendToTarget();
+		}
+	}
+
 	/**
 	 * <p>
 	 * Applications should preferably override {@link #onCancelled(Object)}.

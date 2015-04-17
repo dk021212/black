@@ -3,6 +3,7 @@ package com.stone.support.http;
 import java.util.Map;
 
 import com.stone.support.error.WeiboException;
+import com.stone.support.file.FileDownloaderHttpHelper;
 
 public class HttpUtility {
 
@@ -21,4 +22,10 @@ public class HttpUtility {
 		return new JavaHttpUtility().executeNormalTask(httpMethod, url, param);
 	}
 
+	public boolean executeDownloadTask(String url, String path,
+			FileDownloaderHttpHelper.DownloadListener downloadListener) {
+		return !Thread.currentThread().isInterrupted()
+				&& new JavaHttpUtility().doGetSaveFile(url, path,
+						downloadListener);
+	}
 }

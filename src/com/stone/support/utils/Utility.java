@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import com.crashlytics.android.answers.BuildConfig;
 import com.stone.bean.AccountBean;
 import com.stone.black.R;
 import com.stone.othercomponent.unreadnotification.NotificationServiceHelper;
@@ -26,14 +27,24 @@ import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
+import android.content.res.Configuration;
+import android.media.AudioManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
+import android.view.Display;
+import android.view.HapticFeedbackConstants;
+import android.view.View;
 
 public class Utility {
 
@@ -263,4 +274,176 @@ public class Utility {
 				- System.currentTimeMillis());
 		return days;
 	}
+
+	public static void printStackTrace(Exception e) {
+		if (BuildConfig.DEBUG) {
+			e.printStackTrace();
+		}
+	}
+
+	public static int dip2px(int dipValue) {
+		float reSize = GlobalContext.getInstance().getResources()
+				.getDisplayMetrics().density;
+		return (int) ((dipValue * reSize) + 0.5);
+	}
+
+	public static int px2dip(int pxValue) {
+		float reSize = GlobalContext.getInstance().getResources()
+				.getDisplayMetrics().density;
+		return (int) ((pxValue / reSize) + 0.5);
+	}
+
+	public static float sp2px(int spValue) {
+		return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, spValue,
+				GlobalContext.getInstance().getResources().getDisplayMetrics());
+	}
+
+	public static boolean isWeiboAccountIdLink(String url) {
+		url = convertWeiboCnToWeiboCom(url);
+		return !TextUtils.isEmpty(url) && url.startsWith("http://weibo.com/u/");
+	}
+
+	public static String getIdFromWeiboAccountLink(String url) {
+
+		url = convertWeiboCnToWeiboCom(url);
+
+		String id = url.substring("http://weibo.com/u/".length());
+		id = id.replace("/", "");
+		return id;
+	}
+
+	// todo need refactor...
+	public static boolean isWeiboAccountDomainLink(String url) {
+		if (TextUtils.isEmpty(url)) {
+			return false;
+		} else {
+			url = convertWeiboCnToWeiboCom(url);
+			boolean a = url.startsWith("http://weibo.com/")
+					|| url.startsWith("http://e.weibo.com/");
+			boolean b = !url.contains("?");
+
+			String tmp = url;
+			if (tmp.endsWith("/")) {
+				tmp = tmp.substring(0, tmp.lastIndexOf("/"));
+			}
+
+			int count = 0;
+			char[] value = tmp.toCharArray();
+			for (char c : value) {
+				if ("/".equalsIgnoreCase(String.valueOf(c))) {
+					count++;
+				}
+			}
+			return a && b && count == 3;
+		}
+	}
+
+	public static String getDomainFromWeiboAccountLink(String url) {
+		url = convertWeiboCnToWeiboCom(url);
+
+		final String NORMAL_DOMAIN_PREFIX = "http://weibo.com/";
+		final String ENTERPRISE_DOMAIN_PREFIX = "http://e.weibo.com/";
+
+		if (TextUtils.isEmpty(url)) {
+			throw new IllegalArgumentException("Url can't be empty");
+		}
+
+		if (!url.startsWith(NORMAL_DOMAIN_PREFIX)
+				&& !url.startsWith(ENTERPRISE_DOMAIN_PREFIX)) {
+			throw new IllegalArgumentException("Url must start with "
+					+ NORMAL_DOMAIN_PREFIX + " or " + ENTERPRISE_DOMAIN_PREFIX);
+		}
+
+		String domain = null;
+		if (url.startsWith(ENTERPRISE_DOMAIN_PREFIX)) {
+			domain = url.substring(ENTERPRISE_DOMAIN_PREFIX.length());
+
+		} else if (url.startsWith(NORMAL_DOMAIN_PREFIX)) {
+			domain = url.substring(NORMAL_DOMAIN_PREFIX.length());
+		}
+		domain = domain.replace("/", "");
+		return domain;
+	}
+
+	private static String convertWeiboCnToWeiboCom(String url) {
+		if (!TextUtils.isEmpty(url)) {
+			if (url.startsWith("http://weibo.cn")) {
+				url = url.replace("http://weibo.cn", "http://weibo.com");
+			} else if (url.startsWith("http://www.weibo.com")) {
+				url = url.replace("http://www.weibo.com", "http://weibo.com");
+			} else if (url.startsWith("http://www.weibo.cn")) {
+				url = url.replace("http://www.weibo.cn", "http://weibo.com");
+			}
+		}
+		return url;
+	}
+
+	public static void vibrate(Context context, View view) {
+		view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+
+	}
+
+	public static boolean isConnected(Context context) {
+		ConnectivityManager cm = (ConnectivityManager) context
+				.getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+		return networkInfo != null && networkInfo.isConnected();
+	}
+
+	public static boolean isWifi(Context context) {
+		ConnectivityManager cm = (ConnectivityManager) context
+				.getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+		if (networkInfo != null && networkInfo.isConnected()) {
+			if (networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public static int getScreenWidth() {
+		Activity activity = GlobalContext.getInstance().getActivity();
+		if (activity != null) {
+			Display display = activity.getWindowManager().getDefaultDisplay();
+			DisplayMetrics metrics = new DisplayMetrics();
+			display.getMetrics(metrics);
+			return metrics.widthPixels;
+		}
+
+		return 480;
+	}
+
+	public static int getScreenHeight() {
+		Activity activity = GlobalContext.getInstance().getActivity();
+		if (activity != null) {
+			Display display = activity.getWindowManager().getDefaultDisplay();
+			DisplayMetrics metrics = new DisplayMetrics();
+			display.getMetrics(metrics);
+			return metrics.heightPixels;
+		}
+		return 800;
+	}
+
+	public static void unregisterReceiverIgnoredReceiverNotRegisteredException(
+			Context context, BroadcastReceiver broadcastReceiver) {
+		try {
+			context.getApplicationContext().unregisterReceiver(
+					broadcastReceiver);
+		} catch (IllegalArgumentException receiverNotRegisteredException) {
+			receiverNotRegisteredException.printStackTrace();
+		}
+	}
+
+	public static boolean isSystemRinger(Context context) {
+		AudioManager manager = (AudioManager) context
+				.getSystemService(Context.AUDIO_SERVICE);
+		return manager.getRingerMode() == AudioManager.RINGER_MODE_NORMAL;
+	}
+
+	public static boolean isDevicePort() {
+        return GlobalContext.getInstance().getResources().getConfiguration().orientation
+                == Configuration.ORIENTATION_PORTRAIT;
+    }
 }

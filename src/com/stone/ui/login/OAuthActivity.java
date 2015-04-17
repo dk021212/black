@@ -236,6 +236,7 @@ public class OAuthActivity extends AbstractAppActivity {
 
 		@Override
 		protected void onPreExecute() {
+
 			progressFragment.setAsyncTask(this);
 
 			OAuthActivity activity = oAuthActivityWeakReference.get();
@@ -246,6 +247,7 @@ public class OAuthActivity extends AbstractAppActivity {
 
 		@Override
 		protected DBResult doInBackground(String... params) {
+			
 			String token = params[0];
 			long expiresInSeconds = Long.valueOf(params[1]);
 
@@ -269,6 +271,7 @@ public class OAuthActivity extends AbstractAppActivity {
 
 		@Override
 		protected void onCancelled(DBResult dbResult) {
+
 			super.onCancelled(dbResult);
 			if (progressFragment != null) {
 				progressFragment.dismissAllowingStateLoss();
@@ -289,6 +292,7 @@ public class OAuthActivity extends AbstractAppActivity {
 
 		@Override
 		protected void onPostExecute(DBResult dbResult) {
+
 			if (progressFragment.isVisible()) {
 				progressFragment.dismissAllowingStateLoss();
 			}
@@ -299,12 +303,14 @@ public class OAuthActivity extends AbstractAppActivity {
 			}
 
 			switch (dbResult) {
-			case add_successfully:
+			case add_successfuly:
+				AppLogger.i("add_success");
 				Toast.makeText(activity,
 						activity.getString(R.string.login_success),
 						Toast.LENGTH_LONG).show();
 				break;
-			case update_successfully:
+			case update_successfuly:
+				AppLogger.i("update_success");
 				Toast.makeText(activity, R.string.update_account_success,
 						Toast.LENGTH_LONG).show();
 				break;
@@ -357,6 +363,6 @@ public class OAuthActivity extends AbstractAppActivity {
 	};
 
 	public static enum DBResult {
-		add_successfully, update_successfully
+		add_successfuly, update_successfuly
 	}
 }

@@ -4,7 +4,11 @@
     <style name="AppTheme_Light" parent="@style/PrivateThemeHoloLightOnlyForInherit">
         <item name="add">@drawable/accountactivity_new_light</item>
         <item name="refresh">@drawable/refresh_light</item>
+        <item name="remove">@drawable/accountactivity_remove_light</item>
         <item name="listview_pic_bg">@color/listview_pic_background_light</item>
+        <item name="listview_checked_color">@color/listview_checked_color_holo_light</item>
+         <item name="link_color">@color/dark_blue</item>
+         <item name="write_weibo">@drawable/friendstimelinefragment_write_light</item>
     </style>
     
     <style name="PrivateThemeHoloLightOnlyForInherit" parent="@android:style/Theme.Holo.Light.DarkActionBar">

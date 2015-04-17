@@ -1,10 +1,15 @@
 package com.stone.support.http;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.InterruptedIOException;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -21,6 +26,7 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import org.apache.http.HttpConnection;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -31,6 +37,8 @@ import com.stone.black.R;
 import com.stone.support.debug.AppLogger;
 import com.stone.support.error.ErrorCode;
 import com.stone.support.error.WeiboException;
+import com.stone.support.file.FileDownloaderHttpHelper;
+import com.stone.support.file.FileManager;
 import com.stone.support.utils.GlobalContext;
 import com.stone.support.utils.Utility;
 
@@ -38,6 +46,8 @@ public class JavaHttpUtility {
 
 	private static final int CONNECT_TIMEOUT = 10 * 1000;
 	private static final int READ_TIMEOUT = 10 * 1000;
+	private static final int DOWNLOAD_CONNECT_TIMEOUT = 15 * 1000;
+	private static final int DWONLOAD_READ_TIMEOUT = 60 * 1000;
 
 	public class NullHostNameVerifier implements HostnameVerifier {
 		public boolean verify(String hostname, SSLSession seesion) {
@@ -316,5 +326,82 @@ public class JavaHttpUtility {
 			e.printStackTrace();
 			throw new WeiboException(errorStr, e);
 		}
+	}
+
+	public boolean doGetSaveFile(String urlStr, String path,
+			FileDownloaderHttpHelper.DownloadListener downloadListener) {
+		File file = FileManager.createNewFileInSDCard(path);
+		if (file == null) {
+			return false;
+		}
+
+		BufferedOutputStream out = null;
+		InputStream in = null;
+		HttpURLConnection urlConnection = null;
+
+		try {
+			URL url = new URL(urlStr);
+			AppLogger.d("download request=" + urlStr);
+			Proxy proxy = getProxy();
+			if (proxy != null) {
+				urlConnection = (HttpURLConnection) url.openConnection(proxy);
+			} else {
+				urlConnection = (HttpURLConnection) url.openConnection();
+			}
+
+			urlConnection.setRequestMethod("GET");
+			urlConnection.setDoOutput(false);
+			urlConnection.setConnectTimeout(DOWNLOAD_CONNECT_TIMEOUT);
+			urlConnection.setReadTimeout(DWONLOAD_READ_TIMEOUT);
+			urlConnection.setRequestProperty("Connection", "Keep-Alive");
+			urlConnection.setRequestProperty("Charset", "UTF-8");
+			urlConnection
+					.setRequestProperty("Accept-Encoding", "gzip, deflate");
+
+			urlConnection.connect();
+
+			int status = urlConnection.getResponseCode();
+
+			if (status != HttpURLConnection.HTTP_OK) {
+				return false;
+			}
+
+			int byteTotal = (int) urlConnection.getContentLength();
+			int byteSum = 0;
+			int byteRead = 0;
+			out = new BufferedOutputStream(new FileOutputStream(file));
+			in = new BufferedInputStream(urlConnection.getInputStream());
+
+			final Thread thread = Thread.currentThread();
+			byte[] buffer = new byte[1444];
+			while ((byteRead = in.read(buffer)) != -1) {
+				if (thread.isInterrupted()) {
+					file.delete();
+					throw new InterruptedIOException();
+				}
+
+				byteSum += byteRead;
+				out.write(buffer, 0, byteRead);
+				if (downloadListener != null && byteTotal > 0) {
+					downloadListener.pushProgress(byteSum, byteTotal);
+				}
+			}
+
+			if (downloadListener != null) {
+				downloadListener.completed();
+			}
+
+			return true;
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			Utility.closeSilently(in);
+			Utility.closeSilently(out);
+			if (urlConnection != null) {
+				urlConnection.disconnect();
+			}
+		}
+		
+		return false;
 	}
 }
