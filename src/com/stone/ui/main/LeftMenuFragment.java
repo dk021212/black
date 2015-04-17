@@ -184,6 +184,7 @@ public class LeftMenuFragment extends AbstractAppFragment {
 	}
 
 	private void drawButtonsBackground(int position) {
+		
 		layout.home.setBackgroundResource(R.drawable.btn_drawer_menu);
 		layout.mention.setBackgroundResource(R.drawable.btn_drawer_menu);
 		layout.comment.setBackgroundResource(R.drawable.btn_drawer_menu);

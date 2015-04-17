@@ -48,6 +48,7 @@
                 android:textStyle="bold" />
         </LinearLayout>
         
+
         <include layout="@layout/drawer_contents"/>
     </LinearLayout>
 

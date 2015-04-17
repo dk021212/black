@@ -60,19 +60,17 @@ public class TaskCache {
 
 			try {
 				return downloadWorker.get(30, TimeUnit.SECONDS);
-			}
-			// catch (InterruptedException e) {
-			// Utility.printStackTrace(e);
-			// Thread.currentThread().interrupt();
-			// return false;
-			// } catch (ExecutionException e) {
-			// Utility.printStackTrace(e);
-			// return false;
-			// } catch (TimeoutException e) {
-			// Utility.printStackTrace(e);
-			// return false;
-			// }
-			catch (CancellationException e) {
+			} catch (InterruptedException e) {
+				Utility.printStackTrace(e);
+				Thread.currentThread().interrupt();
+				return false;
+			} catch (ExecutionException e) {
+				Utility.printStackTrace(e);
+				return false;
+			} catch (TimeoutException e) {
+				Utility.printStackTrace(e);
+				return false;
+			} catch (CancellationException e) {
 				removeDownloadTask(url, downloadWorker);
 			}
 
@@ -112,19 +110,17 @@ public class TaskCache {
 				downloadWorker.addDownloadListener(downloadListener);
 				return downloadWorker.get(30, TimeUnit.SECONDS);
 
-			}
-			// catch (InterruptedException e) {
-			// Thread.currentThread().interrupt();
-			// Utility.printStackTrace(e);
-			// return false;
-			// } catch (ExecutionException e) {
-			// Utility.printStackTrace(e);
-			// return false;
-			// } catch (TimeoutException e) {
-			// Utility.printStackTrace(e);
-			// return false;
-			// }
-			catch (CancellationException e) {
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				Utility.printStackTrace(e);
+				return false;
+			} catch (ExecutionException e) {
+				Utility.printStackTrace(e);
+				return false;
+			} catch (TimeoutException e) {
+				Utility.printStackTrace(e);
+				return false;
+			} catch (CancellationException e) {
 				removeDownloadTask(url, downloadWorker);
 			}
 		}

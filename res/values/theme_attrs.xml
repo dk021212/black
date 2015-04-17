@@ -11,4 +11,6 @@
     
     <!--textview link-->
     <attr name="link_color" format="reference"/>
+    
+    <attr name="listview_item_refresh_animation" format="reference"/>
 </resources>

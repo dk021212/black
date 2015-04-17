@@ -11,12 +11,13 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+
 import android.os.Handler;
 import android.os.Message;
-import android.os.AsyncTask.Status;
 
 public abstract class MyAsyncTask<Params, Progress, Result> {
 
@@ -226,6 +227,38 @@ public abstract class MyAsyncTask<Params, Progress, Result> {
 	public final boolean isCancelled() {
 		return mFuture.isCancelled();
 	}
+	
+	/**
+     * Waits if necessary for the computation to complete, and then
+     * retrieves its result.
+     *
+     * @return The computed result.
+     * @throws CancellationException If the computation was cancelled.
+     * @throws ExecutionException    If the computation threw an exception.
+     * @throws InterruptedException  If the current thread was interrupted
+     *                               while waiting.
+     */
+    public final Result get() throws InterruptedException, ExecutionException {
+        return mFuture.get();
+    }
+
+    /**
+     * Waits if necessary for at most the given time for the computation
+     * to complete, and then retrieves its result.
+     *
+     * @param timeout Time to wait before cancelling the operation.
+     * @param unit    The time unit for the timeout.
+     * @return The computed result.
+     * @throws CancellationException If the computation was cancelled.
+     * @throws ExecutionException    If the computation threw an exception.
+     * @throws InterruptedException  If the current thread was interrupted
+     *                               while waiting.
+     * @throws TimeoutException      If the wait timed out.
+     */
+    public final Result get(long timeout, TimeUnit unit) throws InterruptedException,
+            ExecutionException, TimeoutException {
+        return mFuture.get(timeout, unit);
+    }
 
 	/**
 	 * Executes the task with the specified parameters. The task returns itself
@@ -327,12 +360,6 @@ public abstract class MyAsyncTask<Params, Progress, Result> {
 		sDefaultExecutor.execute(runnable);
 	}
 
-	protected final void publishProgress(Progress... value) {
-		if (!isCanceled()) {
-			sHandler.obtainMessage(MESSAGE_POST_PROGRESS,
-					new AsyncTaskResult<Progress>(this, value)).sendToTarget();
-		}
-	}
 
 	/**
 	 * <p>
@@ -404,27 +431,47 @@ public abstract class MyAsyncTask<Params, Progress, Result> {
 	@SuppressWarnings({ "UnusedDeclaration" })
 	protected void onPostExecute(Result result) {
 	}
+	
+	/**
+     * Runs on the UI thread after {@link #publishProgress} is invoked.
+     * The specified values are the values passed to {@link #publishProgress}.
+     *
+     * @param values The values indicating progress.
+     * @see #publishProgress
+     * @see #doInBackground
+     */
+    @SuppressWarnings({"UnusedDeclaration"})
+    protected void onProgressUpdate(Progress... values) {
+    }
 
 	/**
-	 * Runs on the UI thread after {@link #publishProgress} is invoked. The
-	 * specified values are the values passed to {@link #publishProgress}.
-	 *
-	 * @param values
-	 *            The values indicating progress.
-	 * @see #publishProgress
-	 * @see #doInBackground
-	 */
-	protected void onProgressUpdate(Progress... values) {
-	}
+     * This method can be invoked from {@link #doInBackground} to
+     * publish updates on the UI thread while the background computation is
+     * still running. Each call to this method will trigger the execution of
+     * {@link #onProgressUpdate} on the UI thread.
+     * <p/>
+     * {@link #onProgressUpdate} will note be called if the task has been
+     * canceled.
+     *
+     * @param values The progress values to update the UI with.
+     * @see #onProgressUpdate
+     * @see #doInBackground
+     */
+    protected final void publishProgress(Progress... values) {
+        if (!isCancelled()) {
+            sHandler.obtainMessage(MESSAGE_POST_PROGRESS,
+                    new AsyncTaskResult<Progress>(this, values)).sendToTarget();
+        }
+    }
 
-	private void finish(Result result) {
-		if (isCanceled()) {
-			onCancelled(result);
-		} else {
-			onPostExecute(result);
-		}
-		mStatus = Status.FINISHED;
-	}
+    private void finish(Result result) {
+        if (isCancelled()) {
+            onCancelled(result);
+        } else {
+            onPostExecute(result);
+        }
+        mStatus = Status.FINISHED;
+    }
 
 	private static class InternalHandler extends Handler {
 

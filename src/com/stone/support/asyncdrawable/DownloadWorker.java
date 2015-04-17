@@ -87,9 +87,5 @@ public class DownloadWorker extends MyAsyncTask<String, Integer, Boolean>
 		}
 	}
 
-	public boolean get(int i, TimeUnit seconds) {
-		// TODO Auto-generated method stub
-		return false;
-	}
 
 }

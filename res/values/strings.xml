@@ -38,6 +38,8 @@
     
     <!-- timeline -->
     <string name="refresh">刷新</string>
+    <string name="refreshing">刷新中……</string>
+    <string name="new_messages_count">%s条新消息</string>
     
     <!--Account -->
     <string name="oauthing">授权中</string>
