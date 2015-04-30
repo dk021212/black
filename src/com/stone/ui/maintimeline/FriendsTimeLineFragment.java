@@ -1,6 +1,7 @@
 package com.stone.ui.maintimeline;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
@@ -12,6 +13,7 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 
 import com.stone.bean.AccountBean;
+import com.stone.bean.GroupBean;
 import com.stone.bean.MessageListBean;
 import com.stone.bean.UserBean;
 import com.stone.bean.android.MessageTimeLineData;
@@ -126,10 +128,62 @@ public class FriendsTimeLineFragment extends
 		getAdapter().notifyDataSetChanged();
 		setListViewPositionFromPositionsCache();
 		if (getActivity().getActionBar().getNavigationMode() == ActionBar.NAVIGATION_MODE_LIST) {
-
+			getActivity().getActionBar().setSelectedNavigationItem(
+					getRecentNavIndex());
 		}
 
 	}
+	
+	private void putToGroupDataMemoryCache(String groupId, MessageListBean value) {
+        MessageListBean copy = new MessageListBean();
+        copy.addNewData(value);
+        groupDataCache.put(groupId, copy);
+    }
+	
+	private void setListViewPositionFromPositionsCache() {
+        TimeLinePosition p = positionCache.get(currentGroupId);
+        if (p != null) {
+            getListView().setSelectionFromTop(p.position + 1, p.top);
+        } else {
+            getListView().setSelectionFromTop(0, 0);
+        }
+
+        setListViewUnreadTipBar(p);
+
+    }
+
+	private int getIndexFromGroupId(String id, List<GroupBean> list) {
+
+		if (list == null || list.size() == 0) {
+			return 0;
+		}
+
+		int index = 0;
+
+		if (id.equals("0")) {
+			index = 0;
+		} else if (id.equals("1")) {
+			index = 1;
+		}
+
+		for (int i = 0; i < list.size(); i++) {
+			if (list.get(i).getIdstr().equals(id)) {
+				index = i + 2;
+				break;
+			}
+		}
+		return index;
+	}
+	
+	private int getRecentNavIndex() {
+        List<GroupBean> list = new ArrayList<GroupBean>();
+        if (GlobalContext.getInstance().getGroup() != null) {
+            list = GlobalContext.getInstance().getGroup().getLists();
+        } else {
+            list = new ArrayList<GroupBean>();
+        }
+        return getIndexFromGroupId(currentGroupId, list);
+    }
 
 	private static class DBCacheTask extends
 			MyAsyncTask<Void, MessageTimeLineData, List<MessageTimeLineData>> {
