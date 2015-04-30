@@ -1,5 +1,6 @@
 package com.stone.support.asyncdrawable;
 
+import com.stone.bean.MessageBean;
 import com.stone.bean.UserBean;
 import com.stone.black.R;
 import com.stone.support.debug.AppLogger;
@@ -10,6 +11,7 @@ import com.stone.support.lib.MyAsyncTask;
 import com.stone.support.settinghelper.SettingUtility;
 import com.stone.support.utils.GlobalContext;
 import com.stone.support.utils.ThemeUtility;
+import com.stone.ui.basefragment.AbstractTimeLineFragment;
 
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -17,6 +19,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
+import android.view.View;
 import android.widget.ImageView;
 
 public class TimeLineBitmapDownloader {
@@ -26,6 +29,9 @@ public class TimeLineBitmapDownloader {
 
 	private static TimeLineBitmapDownloader instance;
 	private static final Object lock = new Object();
+
+	static volatile boolean pauseDownloadWork = false;
+	static final Object pauseDownloadWorkLock = new Object();
 
 	static volatile boolean pauseReadWork = false;
 	static final Object pauseReadWorkLock = new Object();
@@ -75,6 +81,12 @@ public class TimeLineBitmapDownloader {
 		downloadAvatar(view, user, false);
 	}
 
+	public void downloadAvatar(ImageView view, UserBean user,
+			AbstractTimeLineFragment fragment) {
+		boolean isFling = fragment.isListViewFling();
+		downloadAvatar(view, user, isFling);
+	}
+
 	public void downloadAvatar(ImageView view, UserBean user, boolean isFling) {
 		if (user == null) {
 			view.setImageResource(defaultPictureResId);
@@ -92,6 +104,23 @@ public class TimeLineBitmapDownloader {
 		}
 
 		displayImageView(view, url, method, isFling, false);
+	}
+
+	public void displayMultiPicture(IBlackDrawable view, String picUrl,
+			FileLocationMethod method, AbstractTimeLineFragment fragment) {
+
+		boolean isFling = ((AbstractTimeLineFragment) fragment)
+				.isListViewFling();
+
+		display(view, picUrl, method, isFling, true);
+
+	}
+
+	public void displayMultiPicture(IBlackDrawable view, String picUrl,
+			FileLocationMethod method) {
+
+		display(view, picUrl, method, false, true);
+
 	}
 
 	/**
@@ -234,5 +263,121 @@ public class TimeLineBitmapDownloader {
 
 		}.executeOnExecutor(MyAsyncTask.THREAD_POOL_EXECUTOR);
 
+	}
+
+	private void display(final IBlackDrawable view, final String urlKey,
+			final FileLocationMethod method, boolean isFling,
+			boolean isMultiPictures) {
+		view.getImageView().clearAnimation();
+
+		if (!shouldReloadPicture(view.getImageView(), urlKey)) {
+			return;
+		}
+
+		final Bitmap bitmap = getBitmapFromMemCache(urlKey);
+		if (bitmap != null) {
+			view.setImageBitmap(bitmap);
+			view.getImageView().setTag(urlKey);
+			if (view.getProgressBar() != null) {
+				view.getProgressBar().setVisibility(View.INVISIBLE);
+			}
+			if (view.getImageView().getAlpha() != 1.0f) {
+				view.getImageView().setAlpha(1.0f);
+			}
+
+			view.setGifFlag(ImageUtility.isThisPictureGif(urlKey));
+			cancelPotentialDownload(urlKey, view.getImageView());
+		} else {
+			if (isFling) {
+				view.getImageView().setImageResource(defaultPictureResId);
+				if (view.getProgressBar() != null) {
+					view.getProgressBar().setVisibility(View.INVISIBLE);
+				}
+				view.setGifFlag(ImageUtility.isThisPictureGif(urlKey));
+				return;
+			}
+
+			if (!cancelPotentialDownload(urlKey, view.getImageView())) {
+				return;
+			}
+
+			final ReadWorker newTask = new ReadWorker(view, urlKey, method,
+					isMultiPictures);
+			PictureBitmapDrawable downloaderDrawable = new PictureBitmapDrawable(
+					newTask);
+			view.setImageDrawable(downloaderDrawable);
+
+			// listview fast scroll peformance
+			handler.postDelayed(new Runnable() {
+
+				@Override
+				public void run() {
+					if (getBitmapDownloaderTask(view.getImageView()) == newTask) {
+						newTask.executeOnExecutor(MyAsyncTask.THREAD_POOL_EXECUTOR);
+					}
+					return;
+				}
+
+			}, 400);
+		}
+	}
+
+	public void downContentPic(ImageView view, MessageBean msg,
+			AbstractTimeLineFragment fragment) {
+		String picUrl;
+		boolean isFling = ((AbstractTimeLineFragment) fragment)
+				.isListViewFling();
+
+		if (SettingUtility.getEnableBigPic()) {
+			picUrl = msg.getOriginal_pic();
+			displayImageView(view, picUrl, FileLocationMethod.picture_large,
+					isFling, false);
+		} else {
+			picUrl = msg.getThumbnail_pic();
+			displayImageView(view, picUrl,
+					FileLocationMethod.picture_thumbnail, isFling, false);
+		}
+
+	}
+
+	public void downContentPic(IBlackDrawable view, MessageBean msg,
+			AbstractTimeLineFragment fragment) {
+		String picUrl;
+
+		boolean isFling = ((AbstractTimeLineFragment) fragment)
+				.isListViewFling();
+
+		if (SettingUtility.getEnableBigPic()) {
+			picUrl = msg.getOriginal_pic();
+			display(view, picUrl, FileLocationMethod.picture_large, isFling,
+					false);
+
+		} else {
+			picUrl = msg.getThumbnail_pic();
+			display(view, picUrl, FileLocationMethod.picture_thumbnail,
+					isFling, false);
+
+		}
+	}
+
+	/**
+	 * Pause any ongoing background work. This can be used as a temporary
+	 * measure to improve performance. For example background work could be
+	 * paused when a ListView or GridView is being scrolled using a
+	 * {@link android.widget.AbsListView.OnScrollListener} to keep scrolling
+	 * smooth.
+	 * <p/>
+	 * If work is paused, be sure setPauseDownloadWork(false) is called again
+	 * before your fragment or activity is destroyed (for example during
+	 * {@link android.app.Activity#onPause()}), or there is a risk the
+	 * background thread will never finish.
+	 */
+	public void setPauseDownloadWork(boolean pauseWork) {
+		synchronized (pauseDownloadWorkLock) {
+			TimeLineBitmapDownloader.pauseDownloadWork = pauseWork;
+			if (!TimeLineBitmapDownloader.pauseDownloadWork) {
+				pauseDownloadWorkLock.notifyAll();
+			}
+		}
 	}
 }

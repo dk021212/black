@@ -14,7 +14,9 @@ import com.stone.black.R;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
+import android.os.Bundle;
 import android.os.Handler;
+import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.view.View;
@@ -217,36 +219,96 @@ public class TopTipBar extends TextView {
 			this.onChangeListener.onChange(ids.size());
 		}
 	}
-	
-	public void setError(String error){
-		this.disapper=true;
-		this.error=true;
+
+	public void setError(String error) {
+		this.disapper = true;
+		this.error = true;
 		setVisibility(View.VISIBLE);
 		animate().alpha(1.0f);
 		setText(error);
 		disappear(3000);
 		setBackgroundResource(R.color.top_tip_bar_error);
 	}
-	
+
 	@Override
-	public Parcelable onSaveInstanceState(){
-		//begin boilerplate code that allows parent classes to save state
-		Parcelable superState=super.onSaveInstanceState();
-		SavedState ss=new SavedState(superState);
+	public Parcelable onSaveInstanceState() {
+		// begin boilerplate code that allows parent classes to save state
+		Parcelable superState = super.onSaveInstanceState();
+		SavedState ss = new SavedState(superState);
+		// end
+
+		ss.ids = this.ids;
+		ss.disapper = this.disapper;
+		ss.visible = this.isShown();
+		ss.type = this.type;
+		return ss;
 	}
-	
-	static class SavedState extends BaseSavedState{
-		
+
+	@Override
+	public void onRestoreInstanceState(Parcelable state) {
+		if (!(state instanceof SavedState)) {
+			super.onRestoreInstanceState(state);
+			return;
+		}
+
+		SavedState ss = (SavedState) state;
+		super.onRestoreInstanceState(ss.getSuperState());
+
+		this.ids = ss.ids;
+		this.disapper = ss.disapper;
+		this.type = ss.type;
+		if (ss.visible) {
+			setVisibility(View.VISIBLE);
+		}
+	}
+
+	static class SavedState extends BaseSavedState {
+
 		TreeSet<Long> ids;
 		boolean disapper;
 		boolean visible;
+		Type type;
 
 		public SavedState(Parcelable superState) {
 			super(superState);
 		}
-		
-		private SavedState
-		
+
+		private SavedState(Parcel in) {
+			super(in);
+			Bundle bundle = in.readBundle();
+			this.ids = (TreeSet<Long>) bundle.getSerializable("ids");
+			this.type = (Type) bundle.getSerializable("type");
+			boolean[] disappearArray = new boolean[2];
+			in.readBooleanArray(disappearArray);
+			this.disapper = disappearArray[0];
+			this.visible = disappearArray[1];
+		}
+
+		@Override
+		public void writeToParcel(Parcel out, int flags) {
+			super.writeToParcel(out, flags);
+			Bundle bundle = new Bundle();
+			bundle.putSerializable("ids", ids);
+			bundle.putSerializable("type", type);
+			out.writeBundle(bundle);
+			out.writeBooleanArray(new boolean[] { this.disapper, this.visible });
+
+		}
+
+		// required field that makes Parcelables from Parcel
+		public static Parcelable.Creator<SavedState> CREATOR = new Parcelable.Creator<SavedState>() {
+
+			@Override
+			public SavedState createFromParcel(Parcel source) {
+				return new SavedState(source);
+			}
+
+			@Override
+			public SavedState[] newArray(int size) {
+				return new SavedState[size];
+			}
+		};
+
 	}
 
 }

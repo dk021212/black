@@ -12,6 +12,11 @@
     <dimen name="timeline_pic_thumbnail_width">157dp</dimen>
     
     <dimen name="drawerTextSize">16.0dip</dimen>
+    
+     <!--browser weibo-->
+    <dimen name="browser_msg_bg_padding">10dp</dimen>
+    <dimen name="browser_msg_avatar_height">@dimen/timeline_avatar_height</dimen>
+    <dimen name="browser_msg_avatar_width">@dimen/timeline_avatar_width</dimen>
 
 
 </resources>

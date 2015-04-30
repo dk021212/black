@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:addStatesFromChildren="true"
+        android:foreground="@drawable/timelineimageview_cover" >
+
+        <ImageView
+            android:id="@+id/imageview"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:adjustViewBounds="true" >
+        </ImageView>
+
+        <com.stone.support.gallery.NoZoomWebView
+            android:id="@+id/gif"
+            android:layout_width="400dp"
+            android:layout_height="400dp"
+            android:visibility="gone" >
+        </com.stone.support.gallery.NoZoomWebView>
+    </FrameLayout>
+
+    <ProgressBar
+        android:id="@+id/imageview_pb"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:indeterminate="false"
+        android:visibility="gone" >
+    </ProgressBar>
+
+    <Button
+        android:id="@+id/retry"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="@string/retry_download_pic" >
+    </Button>
+
+</merge>

@@ -1,6 +1,7 @@
 package com.stone.support.utils;
 
 import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -8,15 +9,22 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import com.crashlytics.android.answers.BuildConfig;
 import com.stone.bean.AccountBean;
+import com.stone.bean.MessageBean;
 import com.stone.black.R;
 import com.stone.othercomponent.unreadnotification.NotificationServiceHelper;
 import com.stone.support.debug.AppLogger;
+import com.stone.support.error.WeiboException;
+import com.stone.support.file.FileLocationMethod;
+import com.stone.support.file.FileManager;
+import com.stone.support.lib.AutoScrollListView;
+import com.stone.support.lib.MyAsyncTask;
 import com.stone.ui.blackmagic.BlackMagicActivity;
 import com.stone.ui.login.AccountActivity;
 import com.stone.ui.login.OAuthActivity;
@@ -33,11 +41,13 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.pm.Signature;
 import android.content.res.Configuration;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
@@ -45,6 +55,8 @@ import android.util.TypedValue;
 import android.view.Display;
 import android.view.HapticFeedbackConstants;
 import android.view.View;
+import android.widget.ListView;
+import android.widget.ShareActionProvider;
 
 public class Utility {
 
@@ -443,7 +455,87 @@ public class Utility {
 	}
 
 	public static boolean isDevicePort() {
-        return GlobalContext.getInstance().getResources().getConfiguration().orientation
-                == Configuration.ORIENTATION_PORTRAIT;
+		return GlobalContext.getInstance().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
+	}
+
+	public static void stopListViewScrollingAndScrollTop(ListView listView) {
+		if (listView instanceof AutoScrollListView) {
+			((AutoScrollListView) listView).requestPositionToScreen(0, true);
+		} else {
+			listView.smoothScrollToPosition(0, 0);
+		}
+	}
+
+	public static boolean isAllNotNull(Object... obs) {
+		for (int i = 0; i < obs.length; i++) {
+			if (obs[i] == null) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	public static View getListViewItemViewFromPosition(ListView listView,
+			int position) {
+		return listView.getChildAt(position
+				- listView.getFirstVisiblePosition());
+	}
+
+	public static boolean isIntentSafe(Activity activity, Uri uri) {
+		Intent mapCall = new Intent(Intent.ACTION_VIEW, uri);
+		PackageManager packageManager = activity.getPackageManager();
+		List<ResolveInfo> activities = packageManager.queryIntentActivities(
+				mapCall, 0);
+		return activities.size() > 0;
+	}
+
+	public static boolean isIntentSafe(Activity activity, Intent intent) {
+		PackageManager packageManager = activity.getPackageManager();
+		List<ResolveInfo> activities = packageManager.queryIntentActivities(
+				intent, 0);
+		return activities.size() > 0;
+	}
+
+	public static void setShareIntent(Activity activity,
+			ShareActionProvider mShareActionProvider, MessageBean msg) {
+		Intent shareIntent = new Intent(Intent.ACTION_SEND);
+		if (msg != null && msg.getUser() != null) {
+			shareIntent.setType("text/plain");
+			shareIntent.putExtra(Intent.EXTRA_TEXT, "@"
+					+ msg.getUser().getScreen_name() + ":" + msg.getText());
+			if (!TextUtils.isEmpty(msg.getThumbnail_pic())) {
+				Uri picUrl = null;
+				String smallPath = FileManager.getFilePathFromUrl(
+						msg.getThumbnail_pic(),
+						FileLocationMethod.picture_thumbnail);
+				String middlePath = FileManager.getFilePathFromUrl(
+						msg.getBmiddle_pic(),
+						FileLocationMethod.picture_bmiddle);
+				String largePath = FileManager
+						.getFilePathFromUrl(msg.getOriginal_pic(),
+								FileLocationMethod.picture_large);
+				if (new File(largePath).exists()) {
+					picUrl = Uri.fromFile(new File(largePath));
+				} else if (new File(middlePath).exists()) {
+					picUrl = Uri.fromFile(new File(middlePath));
+				} else if (new File(smallPath).exists()) {
+					picUrl = Uri.fromFile(new File(smallPath));
+				}
+
+				if (picUrl != null) {
+					shareIntent.putExtra(Intent.EXTRA_STREAM, picUrl);
+					shareIntent.setType("image/*");
+				}
+			}
+			if (Utility.isIntentSafe(activity, shareIntent)
+					&& mShareActionProvider != null) {
+				mShareActionProvider.setShareIntent(shareIntent);
+			}
+		}
+	}
+	
+	public static boolean isTaskStopped(MyAsyncTask task) {
+        return task == null || task.getStatus() == MyAsyncTask.Status.FINISHED;
     }
 }

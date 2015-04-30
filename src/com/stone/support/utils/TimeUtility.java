@@ -180,4 +180,6 @@ public class TimeUtility {
         calendar.setTime(date);
         bean.setMills(calendar.getTimeInMillis());
     }
+    
+ 
 }

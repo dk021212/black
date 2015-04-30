@@ -1,6 +1,8 @@
 package com.stone.ui.userinfo;
 
 import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
 
 import com.stone.bean.MessageListBean;
 import com.stone.bean.UserBean;
@@ -27,5 +29,42 @@ public class NewUserInfoFragment extends AbstractMessageTimeLineFragment<Message
         this.userBean = userBean;
         this.token = token;
     }
+
+
+	@Override
+	public MessageListBean getList() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	protected void listViewItemClick(AdapterView parent, View view,
+			int position, long id) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	protected void newMsgOnPostExecute(MessageListBean newValue,
+			Bundle loaderArgs) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	protected void oldMsgOnPostExecute(MessageListBean newValue) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	protected void buildListAdapter() {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

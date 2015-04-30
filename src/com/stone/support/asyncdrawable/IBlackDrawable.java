@@ -25,7 +25,7 @@ public interface IBlackDrawable {
 	
 	public void checkVerified(UserBean user);
 	
-	public void setPressStateVisibility(boolean value);
+	public void setPressesStateVisibility(boolean value);
 	
 	public void setVisibility(int visibility);
 	

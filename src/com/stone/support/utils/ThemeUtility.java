@@ -1,5 +1,7 @@
 package com.stone.support.utils;
 
+import com.stone.black.R;
+
 import android.content.Context;
 import android.content.res.TypedArray;
 
@@ -22,5 +24,10 @@ public class ThemeUtility {
 		ta.recycle();
 		return resId;
 	}
+	
+	 //android:actionModeShareDrawalbe is not a public attr
+    public static int getActionBarShareItemIcon() {
+        return R.drawable.ic_menu_share_holo_dark;
+    }
 
 }

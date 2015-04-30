@@ -12,6 +12,7 @@ import io.fabric.sdk.android.Fabric;
 import com.crashlytics.android.Crashlytics;
 import com.stone.bean.AccountBean;
 import com.stone.bean.GroupListBean;
+import com.stone.bean.UserBean;
 import com.stone.bean.android.MusicInfo;
 import com.stone.black.R;
 import com.stone.support.crashmanager.CrashManager;
@@ -259,4 +260,9 @@ public class GlobalContext extends Application {
 
 		return bitmapMap;
 	}
+	
+	public static interface MyProfileInfoChangeListener {
+
+        public void onChange(UserBean newUserBean);
+    }
 }

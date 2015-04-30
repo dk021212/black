@@ -384,6 +384,15 @@ public abstract class MyAsyncTask<Params, Progress, Result> {
 	public final boolean isCanceled() {
 		return mFuture.isCancelled();
 	}
+	
+	 /**
+     * Returns the current status of this task.
+     *
+     * @return The current status.
+     */
+    public final Status getStatus() {
+        return mStatus;
+    }
 
 	/**
 	 * Override this method to perform a computation on a background thread. The
