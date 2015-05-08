@@ -139,7 +139,7 @@ public class TopTipBar extends TextView {
 							@Override
 							public void onAnimationEnd(Animator animation) {
 								super.onAnimationEnd(animation);
-								setVisibility(View.VISIBLE);
+								setVisibility(View.INVISIBLE);
 								animate().alpha(1.0f).setListener(null);
 								if (ids.size() > 0) {
 									setCount();

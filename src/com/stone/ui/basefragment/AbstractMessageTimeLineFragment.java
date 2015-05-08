@@ -48,6 +48,7 @@ public abstract class AbstractMessageTimeLineFragment<T extends ListBean<Message
 	@Override
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
+
 		getListView().setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
 		getListView().setOnItemLongClickListener(onItemLongClickListener);
 	}
@@ -57,9 +58,10 @@ public abstract class AbstractMessageTimeLineFragment<T extends ListBean<Message
 		@Override
 		public boolean onItemLongClick(AdapterView<?> parent, View view,
 				int position, long id) {
+
 			if (position - getListView().getHeaderViewsCount() < getList()
 					.getSize()
-					&& position - getListView().getHeaderViewsCount() > 0
+					&& position - getListView().getHeaderViewsCount() >=0
 					&& timeLineAdapter.getItem(position
 							- getListView().getHeaderViewsCount()) != null) {
 				MessageBean msg = getList().getItemList().get(

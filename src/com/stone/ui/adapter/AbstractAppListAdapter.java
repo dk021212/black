@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import android.hardware.Camera.PreviewCallback;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.TextPaint;
@@ -318,11 +317,11 @@ public abstract class AbstractAppListAdapter<T extends ItemBean> extends
 	}
 
 	private void bindOnTouchListener(ViewHolder holder) {
-		holder.listview_root.setClickable(true);
-		holder.username.setClickable(true);
-		holder.time.setClickable(true);
-		holder.content.setClickable(true);
-		holder.repost_content.setClickable(true);
+		holder.listview_root.setClickable(false);
+		holder.username.setClickable(false);
+		holder.time.setClickable(false);
+		holder.content.setClickable(false);
+		holder.repost_content.setClickable(false);
 
 		if (holder.content != null) {
 			holder.content.setOnTouchListener(onTouchListener);

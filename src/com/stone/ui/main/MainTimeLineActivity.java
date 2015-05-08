@@ -230,11 +230,11 @@ public class MainTimeLineActivity extends MainTimeLineParentActivity implements
 
 	private void initFragments() {
 		Fragment friend = getFriendsTimeLineFragment();
-		Fragment mentions = getMentionsTimeLineFragment();
-		Fragment comments = getCommentsTimeLineFragment();
-
-		Fragment fav = getFavFragment();
-		Fragment myself = getMyProfileFragment();
+//		Fragment mentions = getMentionsTimeLineFragment();
+//		Fragment comments = getCommentsTimeLineFragment();
+//
+//		Fragment fav = getFavFragment();
+//		Fragment myself = getMyProfileFragment();
 
 		FragmentTransaction fragmentTransaction = getSupportFragmentManager()
 				.beginTransaction();
@@ -243,30 +243,30 @@ public class MainTimeLineActivity extends MainTimeLineParentActivity implements
 					FriendsTimeLineFragment.class.getName());
 			fragmentTransaction.hide(friend);
 		}
-		if (!mentions.isAdded()) {
-			fragmentTransaction.add(R.id.menu_right_fl, mentions,
-					MentionsTimeLine.class.getName());
-			fragmentTransaction.hide(mentions);
-
-		}
-		if (!comments.isAdded()) {
-			fragmentTransaction.add(R.id.menu_right_fl, comments,
-					CommentsTimeLine.class.getName());
-			fragmentTransaction.hide(comments);
-
-		}
-
-		if (!fav.isAdded()) {
-			fragmentTransaction.add(R.id.menu_right_fl, fav,
-					MyFavListFragment.class.getName());
-			fragmentTransaction.hide(fav);
-		}
-
-		if (!myself.isAdded()) {
-			fragmentTransaction.add(R.id.menu_right_fl, myself,
-					NewUserInfoFragment.class.getName());
-			fragmentTransaction.hide(myself);
-		}
+//		if (!mentions.isAdded()) {
+//			fragmentTransaction.add(R.id.menu_right_fl, mentions,
+//					MentionsTimeLine.class.getName());
+//			fragmentTransaction.hide(mentions);
+//
+//		}
+//		if (!comments.isAdded()) {
+//			fragmentTransaction.add(R.id.menu_right_fl, comments,
+//					CommentsTimeLine.class.getName());
+//			fragmentTransaction.hide(comments);
+//
+//		}
+//
+//		if (!fav.isAdded()) {
+//			fragmentTransaction.add(R.id.menu_right_fl, fav,
+//					MyFavListFragment.class.getName());
+//			fragmentTransaction.hide(fav);
+//		}
+//
+//		if (!myself.isAdded()) {
+//			fragmentTransaction.add(R.id.menu_right_fl, myself,
+//					NewUserInfoFragment.class.getName());
+//			fragmentTransaction.hide(myself);
+//		}
 
 		if (GlobalContext.getInstance().getAccountBean().isBlack_magic()) {
 			Fragment search = getSearchFragment();
@@ -491,7 +491,7 @@ public class MainTimeLineActivity extends MainTimeLineParentActivity implements
 		}
 	}
 
-	private void saveNavigationPositionToDB() {
+	public void saveNavigationPositionToDB() {
 		int navPosition=getMenuFragment().getCurrentIndex()*10;
 		ActionBar actionBar=getActionBar();
 		int second=0;

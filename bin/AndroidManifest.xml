@@ -23,6 +23,13 @@
         <activity android:launchMode="singleTask" android:name="com.stone.ui.main.MainTimeLineActivity"/>
 
         <meta-data android:name="io.fabric.ApiKey" android:value="c92ba87cacf1f1e4ccc89293619505f77dca6e53"/>
+        
+        <!---broadcast receiver -->
+        <receiver android:exported="false" android:name="com.stone.othercomponent.unreadnotification.UnreadMsgReceiver">
+            <intent-filter>
+                <action android:name="com.stone.newmsg.priority"/>
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

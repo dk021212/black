@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 import com.crashlytics.android.answers.BuildConfig;
 import com.stone.bean.AccountBean;
 import com.stone.bean.MessageBean;
+import com.stone.bean.android.TimeLinePosition;
 import com.stone.black.R;
 import com.stone.othercomponent.unreadnotification.NotificationServiceHelper;
 import com.stone.support.debug.AppLogger;
@@ -534,8 +535,24 @@ public class Utility {
 			}
 		}
 	}
-	
+
 	public static boolean isTaskStopped(MyAsyncTask task) {
-        return task == null || task.getStatus() == MyAsyncTask.Status.FINISHED;
-    }
+		return task == null || task.getStatus() == MyAsyncTask.Status.FINISHED;
+	}
+
+	public static TimeLinePosition getCurrentPositionFromListView(
+			ListView listView) {
+		View view = listView.getChildAt(1);
+		int top = (view != null ? view.getTop() : 0);
+		return new TimeLinePosition(listView.getFirstVisiblePosition(), top);
+	}
+
+	public static void cancelTasks(MyAsyncTask... tasks) {
+		for (MyAsyncTask task : tasks) {
+			if (task != null) {
+				task.cancel(true);
+			}
+		}
+
+	}
 }

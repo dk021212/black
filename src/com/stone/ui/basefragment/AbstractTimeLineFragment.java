@@ -70,7 +70,7 @@ public abstract class AbstractTimeLineFragment<T extends ListBean> extends
 
 	protected ActionMode mActionMode;
 
-	protected int savedCurrentLoadingMsgViewPositon = NO_SAVED_CURRENT_LOADING_MSG_VIEW_POSITION;
+	protected int savedCurrentLoadingMsgViewPosition = NO_SAVED_CURRENT_LOADING_MSG_VIEW_POSITION;
 
 	public static final int NO_SAVED_CURRENT_LOADING_MSG_VIEW_POSITION = -1;
 
@@ -156,7 +156,7 @@ public abstract class AbstractTimeLineFragment<T extends ListBean> extends
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		outState.putInt("savedCurrentLoadingMsgViewPosition",
-				savedCurrentLoadingMsgViewPositon);
+				savedCurrentLoadingMsgViewPosition);
 	}
 
 	@Override
@@ -187,6 +187,7 @@ public abstract class AbstractTimeLineFragment<T extends ListBean> extends
 
 	@Override
 	public void onViewCreated(View view, Bundle savedInstanceState) {
+		
 		super.onViewCreated(view, savedInstanceState);
 
 		pullToRefreshListView.setOnRefreshListener(listViewOnRefreshListener);
@@ -199,15 +200,15 @@ public abstract class AbstractTimeLineFragment<T extends ListBean> extends
 		buildListAdapter();
 
 		if (savedInstanceState != null) {
-			savedCurrentLoadingMsgViewPositon = savedInstanceState.getInt(
+			savedCurrentLoadingMsgViewPosition = savedInstanceState.getInt(
 					"savedCurrentLoadingMsgViewPosition",
 					NO_SAVED_CURRENT_LOADING_MSG_VIEW_POSITION);
 		}
 
-		if (savedCurrentLoadingMsgViewPositon != NO_SAVED_CURRENT_LOADING_MSG_VIEW_POSITION
+		if (savedCurrentLoadingMsgViewPosition != NO_SAVED_CURRENT_LOADING_MSG_VIEW_POSITION
 				&& timeLineAdapter instanceof AbstractAppListAdapter) {
 			((AbstractAppListAdapter) timeLineAdapter)
-					.setSavedMiddleLoadingViewPosition(savedCurrentLoadingMsgViewPositon);
+					.setSavedMiddleLoadingViewPosition(savedCurrentLoadingMsgViewPosition);
 		}
 
 	}
@@ -312,14 +313,14 @@ public abstract class AbstractTimeLineFragment<T extends ListBean> extends
 							.getId();
 					ListViewMiddleMsgLoadingView loadingView = (ListViewMiddleMsgLoadingView) view;
 					if (!((ListViewMiddleMsgLoadingView) view).isLoading()
-							&& savedCurrentLoadingMsgViewPositon == NO_SAVED_CURRENT_LOADING_MSG_VIEW_POSITION) {
+							&& savedCurrentLoadingMsgViewPosition == NO_SAVED_CURRENT_LOADING_MSG_VIEW_POSITION) {
 						loadingView.load();
 						loadMiddleMsg(beginId, endId, indexInDataSource);
-						savedCurrentLoadingMsgViewPositon = indexInDataSource
+						savedCurrentLoadingMsgViewPosition = indexInDataSource
 								+ headerViewCount;
 						if (timeLineAdapter instanceof AbstractAppListAdapter) {
 							((AbstractAppListAdapter) timeLineAdapter)
-									.setSavedMiddleLoadingViewPosition(savedCurrentLoadingMsgViewPositon);
+									.setSavedMiddleLoadingViewPosition(savedCurrentLoadingMsgViewPosition);
 						}
 					}
 				}
@@ -594,7 +595,7 @@ public abstract class AbstractTimeLineFragment<T extends ListBean> extends
 			case MIDDLE_MSG_LOADER_ID:
 				if (exception != null) {
 					View view = Utility.getListViewItemViewFromPosition(
-							getListView(), savedCurrentLoadingMsgViewPositon);
+							getListView(), savedCurrentLoadingMsgViewPosition);
 					ListViewMiddleMsgLoadingView loadingView = (ListViewMiddleMsgLoadingView) view;
 					if (loadingView != null) {
 						loadingView.setErrorMessage(exception.getError());
@@ -603,10 +604,10 @@ public abstract class AbstractTimeLineFragment<T extends ListBean> extends
 					middleMsgOnPostExecute(middlePosition, data, towardsBottom);
 				}
 
-				savedCurrentLoadingMsgViewPositon = NO_SAVED_CURRENT_LOADING_MSG_VIEW_POSITION;
+				savedCurrentLoadingMsgViewPosition = NO_SAVED_CURRENT_LOADING_MSG_VIEW_POSITION;
 				if (timeLineAdapter instanceof AbstractAppListAdapter) {
 					((AbstractAppListAdapter) timeLineAdapter)
-							.setSavedMiddleLoadingViewPosition(savedCurrentLoadingMsgViewPositon);
+							.setSavedMiddleLoadingViewPosition(savedCurrentLoadingMsgViewPosition);
 				}
 			}
 		}
@@ -625,9 +626,8 @@ public abstract class AbstractTimeLineFragment<T extends ListBean> extends
 		return mActionMode != null;
 	}
 
-	public void setmActionMode(Object object) {
-		// TODO Auto-generated method stub
-		
+	public void setmActionMode(ActionMode mActionMode) {
+		this.mActionMode=mActionMode;
 	}
 
 }

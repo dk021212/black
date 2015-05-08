@@ -129,20 +129,20 @@ public class LeftMenuFragment extends AbstractAppFragment {
 		rightFragments.append(HOME_INDEX,
 				((MainTimeLineActivity) getActivity())
 						.getFriendsTimeLineFragment());
-		rightFragments.append(MENTIONS_INDEX,
-				((MainTimeLineActivity) getActivity())
-						.getMentionsTimeLineFragment());
-		rightFragments.append(COMMENTS_INDEX,
-				((MainTimeLineActivity) getActivity())
-						.getCommentsTimeLineFragment());
-		rightFragments.append(SEARCH_INDEX,
-				((MainTimeLineActivity) getActivity()).getSearchFragment());
-		rightFragments.append(DM_INDEX,
-				((MainTimeLineActivity) getActivity()).getDMFragment());
-		rightFragments.append(FAV_INDEX,
-				((MainTimeLineActivity) getActivity()).getFavFragment());
-		rightFragments.append(PROFILE_INDEX,
-				((MainTimeLineActivity) getActivity()).getMyProfileFragment());
+//		rightFragments.append(MENTIONS_INDEX,
+//				((MainTimeLineActivity) getActivity())
+//						.getMentionsTimeLineFragment());
+//		rightFragments.append(COMMENTS_INDEX,
+//				((MainTimeLineActivity) getActivity())
+//						.getCommentsTimeLineFragment());
+//		rightFragments.append(SEARCH_INDEX,
+//				((MainTimeLineActivity) getActivity()).getSearchFragment());
+//		rightFragments.append(DM_INDEX,
+//				((MainTimeLineActivity) getActivity()).getDMFragment());
+//		rightFragments.append(FAV_INDEX,
+//				((MainTimeLineActivity) getActivity()).getFavFragment());
+//		rightFragments.append(PROFILE_INDEX,
+//				((MainTimeLineActivity) getActivity()).getMyProfileFragment());
 
 		switchCategory(currentIndex);
 
@@ -157,24 +157,24 @@ public class LeftMenuFragment extends AbstractAppFragment {
 		case HOME_INDEX:
 			showHomePage(true);
 			break;
-		case MENTIONS_INDEX:
-			showMentionPage(true);
-			break;
-		case COMMENTS_INDEX:
-			showCommentPage(true);
-			break;
-		case SEARCH_INDEX:
-			showSearchPage(true);
-			break;
-		case DM_INDEX:
-			showDMPage(true);
-			break;
-		case FAV_INDEX:
-			showFavPage(true);
-			break;
-		case PROFILE_INDEX:
-			showProfilePage(true);
-			break;
+//		case MENTIONS_INDEX:
+//			showMentionPage(true);
+//			break;
+//		case COMMENTS_INDEX:
+//			showCommentPage(true);
+//			break;
+//		case SEARCH_INDEX:
+//			showSearchPage(true);
+//			break;
+//		case DM_INDEX:
+//			showDMPage(true);
+//			break;
+//		case FAV_INDEX:
+//			showFavPage(true);
+//			break;
+//		case PROFILE_INDEX:
+//			showProfilePage(true);
+//			break;
 		}
 		drawButtonsBackground(position);
 
@@ -264,12 +264,12 @@ public class LeftMenuFragment extends AbstractAppFragment {
 
 	private void showHomePageImp() {
 		FragmentTransaction ft = getFragmentManager().beginTransaction();
-		ft.hide(rightFragments.get(MENTIONS_INDEX));
-		ft.hide(rightFragments.get(COMMENTS_INDEX));
-		ft.hide(rightFragments.get(SEARCH_INDEX));
-		ft.hide(rightFragments.get(DM_INDEX));
-		ft.hide(rightFragments.get(FAV_INDEX));
-		ft.hide(rightFragments.get(PROFILE_INDEX));
+//		ft.hide(rightFragments.get(MENTIONS_INDEX));
+//		ft.hide(rightFragments.get(COMMENTS_INDEX));
+//		ft.hide(rightFragments.get(SEARCH_INDEX));
+//		ft.hide(rightFragments.get(DM_INDEX));
+//		ft.hide(rightFragments.get(FAV_INDEX));
+//		ft.hide(rightFragments.get(PROFILE_INDEX));
 
 		FriendsTimeLineFragment fragment = (FriendsTimeLineFragment) rightFragments
 				.get(HOME_INDEX);

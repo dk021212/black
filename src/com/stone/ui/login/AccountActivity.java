@@ -1,5 +1,7 @@
 package com.stone.ui.login;
 
+//import com.crashlytics.android.Crashlytics;
+//import io.fabric.sdk.android.Fabric;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -65,6 +67,7 @@ public class AccountActivity extends AbstractAppActivity implements
 		}
 
 		super.onCreate(savedInstanceState);
+//		Fabric.with(this, new Crashlytics());
 
 		setContentView(R.layout.account_activity_layout);
 		getActionBar().setTitle(getString(R.string.app_name));

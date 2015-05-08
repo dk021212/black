@@ -15,7 +15,7 @@
     <!-- requiresFadingEdge may have perfromance problem in some low price phones, but I like it. -->
     <!-- use overScrollMode to disable blue boundaries at the top and the bottom of listview because it is pull to refresh listview -->
 
-    <com.stone.support.lib.pulltorefresh.PullToRefreshLitView
+    <com.stone.support.lib.pulltorefresh.PullToRefreshListView
         android:id="@+id/listView"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
@@ -25,7 +25,7 @@
         android:scrollingCache="true"
         android:smoothScrollbar="true"
         android:visibility="visible" >
-    </com.stone.support.lib.pulltorefresh.PullToRefreshLitView>
+    </com.stone.support.lib.pulltorefresh.PullToRefreshListView>
 
     <ProgressBar
         android:id="@+id/progressbar"

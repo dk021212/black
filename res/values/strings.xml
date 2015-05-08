@@ -80,7 +80,7 @@
     <string name="sd_card_in_not_mounted">SD卡未挂载</string>
     <string name="something_error">发生故障</string>
     <string name="please_deleted_cache_dir">权限出错，无法读取存储空间，需要用户手动删除SD卡下的
-        /Android/data/org.qii.weiciyuan 目录
+        /Android/data/black 目录
     </string>
 
 

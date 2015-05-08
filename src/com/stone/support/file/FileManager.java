@@ -58,7 +58,7 @@ public class FileManager {
 									public void run() {
 										Toast.makeText(
 												GlobalContext.getInstance(),
-												R.string.please_delete_cache_dir,
+												R.string.please_deleted_cache_dir,
 												Toast.LENGTH_LONG).show();
 
 									}
@@ -73,7 +73,7 @@ public class FileManager {
 							new AlertDialog.Builder(activity)
 									.setTitle(R.string.something_error)
 									.setMessage(
-											R.string.please_delete_cache_dir)
+											R.string.please_deleted_cache_dir)
 									.setPositiveButton(
 											R.string.ok,
 											new DialogInterface.OnClickListener() {

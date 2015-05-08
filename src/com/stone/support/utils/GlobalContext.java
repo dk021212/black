@@ -3,13 +3,12 @@ package com.stone.support.utils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-import io.fabric.sdk.android.Fabric;
-
-import com.crashlytics.android.Crashlytics;
 import com.stone.bean.AccountBean;
 import com.stone.bean.GroupListBean;
 import com.stone.bean.UserBean;
@@ -71,7 +70,7 @@ public class GlobalContext extends Application {
 		CrashManagerConstants.loadFromContext(this);
 		CrashManager.registerHandler();
 		if (Utility.isCertificateFingerprintCorrect(this)) {
-			Fabric.with(this, new Crashlytics());
+			//Fabric.with(this, new Crashlytics());
 		}
 
 	}
@@ -103,14 +102,14 @@ public class GlobalContext extends Application {
 	public void setCurrentRunningActivity(Activity currentRunningActivity) {
 		this.currentRunningActivity = currentRunningActivity;
 	}
-	
+
 	public String getSpecialToken() {
-        if (getAccountBean() != null) {
-            return getAccountBean().getAccess_token();
-        } else {
-            return "";
-        }
-    }
+		if (getAccountBean() != null) {
+			return getAccountBean().getAccess_token();
+		} else {
+			return "";
+		}
+	}
 
 	public Activity getActivity() {
 
@@ -260,9 +259,23 @@ public class GlobalContext extends Application {
 
 		return bitmapMap;
 	}
-	
+
 	public static interface MyProfileInfoChangeListener {
 
-        public void onChange(UserBean newUserBean);
-    }
+		public void onChange(UserBean newUserBean);
+	}
+
+	private Set<MyProfileInfoChangeListener> profileListenerSet = new HashSet<MyProfileInfoChangeListener>();
+
+	public void registerForAccountChangeListener(
+			MyProfileInfoChangeListener listener) {
+		if (listener != null) {
+			profileListenerSet.add(listener);
+		}
+	}
+
+	public void unRegisterForAccountChangeListener(
+			MyProfileInfoChangeListener listener) {
+		profileListenerSet.remove(listener);
+	}
 }
