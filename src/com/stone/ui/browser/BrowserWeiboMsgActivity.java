@@ -7,10 +7,12 @@ import android.widget.ShareActionProvider;
 import android.widget.Toast;
 
 import com.stone.bean.MessageBean;
+import com.stone.black.R;
 import com.stone.dao.destroy.DestroyStatusDao;
 import com.stone.support.error.WeiboException;
 import com.stone.support.lib.MyAsyncTask;
 import com.stone.support.utils.GlobalContext;
+import com.stone.support.utils.Utility;
 import com.stone.ui.interfaces.AbstractAppActivity;
 import com.stone.ui.task.FavAsyncTask;
 import com.stone.ui.task.UnFavAsyncTask;
@@ -54,6 +56,58 @@ public class BrowserWeiboMsgActivity extends AbstractAppActivity implements
 		super.onSaveInstanceState(outState);
 		outState.putParcelable("msg", msg);
 		outState.putString("token", token);
+	}
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		initLayout();
+		if (savedInstanceState != null) {
+			msg = savedInstanceState.getParcelable("msg");
+			token = savedInstanceState.getString("token");
+			if (msg != null) {
+				buildContent();
+			} else {
+				msgId = getIntent().getStringExtra("weiboId");
+				fetchUserInfoFromServer();
+			}
+		} else {
+			String action = getIntent().getAction();
+			if (ACTION_WITH_ID.equalsIgnoreCase(action)) {
+				token = getIntent().getStringExtra("token");
+				msgId = getIntent().getStringExtra("weiboId");
+				fetchUserInfoFromServer();
+			} else if (ACTION_WITH_DETAIL.equalsIgnoreCase(action)) {
+				Intent intent = getIntent();
+				token = intent.getStringExtra("token");
+				msg = intent.getParcelableExtra("msg");
+				buildContent();
+			} else {
+				throw new IllegalArgumentException(
+						"activity intent action must be " + ACTION_WITH_DETAIL
+								+ " or " + ACTION_WITH_ID);
+			}
+		}
+	}
+	
+	@Override
+	protected void onDestroy(){
+		super.onDestroy();
+		Utility.cancelTasks(removeTask);
+	}
+
+	private void fetchUserInfoFromServer() {
+		getActionBar().setTitle(getString(R.string.fetching_weibo_info));
+	}
+
+	private void buildContent() {
+		// TODO Auto-generated method stub
+
+	}
+
+	private void initLayout() {
+		// TODO Auto-generated method stub
+
 	}
 
 	@Override

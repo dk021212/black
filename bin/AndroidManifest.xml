@@ -1,31 +1,52 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="1" android:versionName="1.0" package="com.stone.black">
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.stone.black"
+    android:versionCode="1"
+    android:versionName="1.0" >
 
-    <uses-sdk android:minSdkVersion="16" android:targetSdkVersion="19"/>
+    <uses-sdk
+        android:minSdkVersion="16"
+        android:targetSdkVersion="19" />
 
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
-    <application android:allowBackup="true" android:icon="@drawable/ic_launcher" android:label="@string/app_name" android:largeHeap="true" android:name="com.stone.support.utils.GlobalContext" android:theme="@style/AppTheme_Light">
-        <activity android:label="@string/app_name" android:name="com.stone.ui.login.AccountActivity" android:uiOptions="splitActionBarWhenNarrow">
+    <application
+        android:name="com.stone.support.utils.GlobalContext"
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:largeHeap="true"
+        android:theme="@style/AppTheme_Light" >
+        <activity
+            android:name="com.stone.ui.login.AccountActivity"
+            android:label="@string/app_name"
+            android:uiOptions="splitActionBarWhenNarrow" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
         <!-- login activity -->
 
-        <activity android:name="com.stone.ui.login.OAuthActivity"/>
-        <activity android:name="com.stone.ui.login.SSOActivity"/>
+        <activity android:name="com.stone.ui.login.OAuthActivity" />
+        <activity android:name="com.stone.ui.login.SSOActivity" />
 
         <!-- main activity -->
-        <activity android:launchMode="singleTask" android:name="com.stone.ui.main.MainTimeLineActivity"/>
+        <activity
+            android:name="com.stone.ui.main.MainTimeLineActivity"
+            android:launchMode="singleTask" />
 
-        <meta-data android:name="io.fabric.ApiKey" android:value="c92ba87cacf1f1e4ccc89293619505f77dca6e53"/>
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="c92ba87cacf1f1e4ccc89293619505f77dca6e53" />
         
         <!---broadcast receiver -->
-        <receiver android:exported="false" android:name="com.stone.othercomponent.unreadnotification.UnreadMsgReceiver">
+        <receiver
+                android:exported="false"
+                android:name="com.stone.othercomponent.unreadnotification.UnreadMsgReceiver">
             <intent-filter>
                 <action android:name="com.stone.newmsg.priority"/>
             </intent-filter>

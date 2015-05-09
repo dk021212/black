@@ -32,7 +32,9 @@ import org.json.JSONObject;
 
 import android.text.TextUtils;
 
-import com.crashlytics.android.answers.BuildConfig;
+
+import com.stone.black.BuildConfig;
+//import com.crashlytics.android.answers.BuildConfig;
 import com.stone.black.R;
 import com.stone.support.debug.AppLogger;
 import com.stone.support.error.ErrorCode;

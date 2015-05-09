@@ -14,10 +14,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import com.crashlytics.android.answers.BuildConfig;
+
+//import com.crashlytics.android.answers.BuildConfig;
 import com.stone.bean.AccountBean;
 import com.stone.bean.MessageBean;
 import com.stone.bean.android.TimeLinePosition;
+import com.stone.black.BuildConfig;
 import com.stone.black.R;
 import com.stone.othercomponent.unreadnotification.NotificationServiceHelper;
 import com.stone.support.debug.AppLogger;
